@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D1stack — Senior engineering for complex digital platforms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink-900:#10181F; --ink-600:#33424E; --ink-500:#35424D; --ink-400:#46555F;
+  --grey-500:#6E7F8D; --grey-400:#8294A3; --grey-300:#93A2AE; --grey-200:#C9D3DC; --grey-100:#DAE2EB;
+  --paper:#EEF2F5; --white:#fff; --accent:#9C253B; --accent-600:#AD2B43;
+  --sans:'IBM Plex Sans',Helvetica,Arial,sans-serif; --mono:'IBM Plex Mono',monospace;
+  --rail:280px; --gutter:56px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink-900);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased}
+a{color:var(--ink-400);text-decoration:none}
+a:hover{color:var(--accent)}
+h1,h2,h3{margin:0;font-weight:300;letter-spacing:-.02em}
+p{margin:0;text-wrap:pretty}
+img{display:block;max-width:100%}
+
+/* ---------- layout ---------- */
+.shell{display:flex;min-height:100vh}
+.rail{position:fixed;left:0;top:0;bottom:0;width:var(--rail);background:var(--ink-900);padding:48px 0 44px 44px;display:flex;flex-direction:column;justify-content:space-between;z-index:10}
+.wordmark{font-family:var(--mono);font-weight:500;font-size:22px;letter-spacing:.16em;color:var(--white)}
+.nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:38px}
+.nav a{display:flex;gap:14px;align-items:flex-start}
+.nav svg{flex:none;margin-top:2px;stroke:var(--grey-400);width:24px;height:24px}
+.nav .n{display:block;font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--grey-400);margin-bottom:6px}
+.nav .l{display:block;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey-400)}
+.nav .u{display:block;width:56px;height:1px;background:var(--accent);margin-top:12px;opacity:0}
+.nav a[aria-current="true"] svg{stroke:var(--accent)}
+.nav a[aria-current="true"] .n{color:var(--accent)}
+.nav a[aria-current="true"] .l{color:var(--white);font-weight:500}
+.nav a[aria-current="true"] .u{opacity:1}
+.rail-foot{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--grey-400)}
+main{margin-left:var(--rail);flex:1;min-width:0}
+.view{display:none}
+.view.is-active{display:block}
+.block{padding:88px var(--gutter)}
+.block.dark{background:var(--ink-900);color:var(--white)}
+.block.dark p{color:var(--grey-400)}
+
+/* ---------- type ---------- */
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-500)}
+.dark .eyebrow{color:var(--grey-400)}
+.accrule{width:72px;height:1px;background:var(--accent);margin:26px 0 30px}
+.h1{font-size:64px;line-height:1.08}
+.h2{font-size:48px;line-height:1}
+.h3{font-size:34px;line-height:1.2}
+.lead{font-size:26px;line-height:1.5;color:var(--grey-500)}
+.dark .lead{color:var(--grey-400)}
+.body{font-size:18px;line-height:1.6;color:var(--ink-400);max-width:68ch}
+.small{font-size:16px;line-height:1.55;color:var(--grey-500)}
+.statement{font-size:30px;line-height:1.35;color:var(--ink-900)}
+.dark .statement{color:var(--white)}
+.mono{font-family:var(--mono);font-size:13px;letter-spacing:.12em}
+
+/* ---------- pieces ---------- */
+.btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:14px 26px;border:1px solid var(--accent);background:var(--accent);color:var(--white);cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--accent-600);color:var(--white)}
+.rule{height:1px;background:var(--grey-200)}
+.dark .rule{background:var(--ink-500)}
+
+.diagram{position:relative;height:520px;opacity:.55}
+.diagram i{position:absolute;background:var(--ink-500);display:block}
+.diagram b{position:absolute;width:9px;height:9px;background:var(--grey-400)}
+.diagram b.on{background:var(--accent)}
+.diagram span{position:absolute;font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--grey-400)}
+.diagram span.on{color:var(--grey-100)}
+
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--grey-200);padding-top:34px;margin-top:56px}
+.cols3 > div{padding:0 44px}
+.cols3 > div:first-child{padding-left:0}
+.cols3 > div + div{border-left:1px solid var(--grey-200)}
+.num{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--grey-300);margin-bottom:16px}
+.num.on{color:var(--accent)}
+.ttl{font-size:20px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+
+.profile{display:flex;gap:56px;align-items:flex-start}
+.profile.mirror{flex-direction:row-reverse}
+.portrait{width:260px;height:260px;object-fit:cover;flex:none;background:var(--grey-200)}
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:14px 48px;border-top:1px solid var(--grey-200);padding-top:22px;margin-top:22px;max-width:640px}
+.matrix span{font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-600)}
+.linkedin{display:inline-block;margin-top:36px;font-family:var(--mono);font-size:13px;letter-spacing:.14em;border-bottom:1px solid var(--grey-200);padding-bottom:8px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:44px 48px;margin-top:44px}
+.item{border-top:1px solid var(--grey-200);padding-top:26px}
+.item.on{border-top:2px solid var(--accent)}
+.item h3{font-size:20px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;line-height:1.3;margin-bottom:14px}
+.feature{border-top:2px solid var(--accent);padding-top:30px;display:flex;gap:64px;align-items:flex-start;margin-top:44px}
+.feature > div{flex:none;width:38%}
+.feature h3{font-size:34px;font-weight:400;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
+.feature p{flex:1;font-size:22px;line-height:1.5;color:var(--ink-400)}
+
+.stage{border-top:1px solid var(--grey-200);padding-top:30px}
+.stage.on{border-top:1px solid var(--accent)}
+.stage svg{stroke:var(--ink-400);width:32px;height:32px;margin-bottom:22px}
+.output{border-top:1px solid var(--grey-200);padding-top:18px;margin-top:26px}
+.output .lbl{font-family:var(--mono);font-size:13px;letter-spacing:.14em;color:var(--accent);margin-bottom:10px}
+.output .val{font-size:16px;line-height:1.45;color:var(--ink-600)}
+
+.path{position:relative;margin:64px 0 0;padding:120px 0}
+.path .line{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--accent)}
+.path ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);position:relative;min-height:2px}
+.path li{position:relative;padding-top:0}
+.path li b{position:absolute;left:0;top:-5px;width:11px;height:11px;background:var(--grey-300)}
+.path li.on b{background:var(--accent)}
+.path li > div{position:absolute;left:0;width:100%;padding-right:16px}
+.path li.up > div{bottom:26px}
+.path li.down > div{top:26px}
+.path li .nm{font-size:17px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-600);line-height:1.3}
+.path li.on .nm{color:var(--ink-900)}
+.path li .tag{font-family:var(--mono);font-size:13px;color:var(--accent);margin-top:8px}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+.metaphor{display:grid;grid-template-columns:420px 1fr;gap:56px;align-items:start}
+.photo{width:100%;aspect-ratio:3/4;background:var(--grey-200);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--grey-500);text-align:center;padding:0}
+.contact{display:flex;gap:56px;flex-wrap:wrap;border-top:1px solid var(--ink-500);padding-top:28px;margin-top:64px;font-family:var(--mono);font-size:15px;letter-spacing:.14em}
+
+@media (max-width:1100px){
+  .rail{position:static;width:100%;flex-direction:row;align-items:center;justify-content:flex-start;gap:32px;padding:16px 24px;overflow-x:auto}
+  .rail-foot{display:none}
+  .nav{flex-direction:row;gap:24px}
+  .nav a{display:block}
+  .nav svg{display:none}
+  .nav .u{margin-top:6px}
+  .shell{display:block}
+  main{margin-left:0}
+  .block{padding:56px 24px}
+  .h1{font-size:40px}.h2{font-size:32px}.h3{font-size:26px}
+  .lead{font-size:20px}.statement{font-size:22px}.feature h3{font-size:24px}
+  .cols3{grid-template-columns:1fr;gap:32px}
+  .cols3 > div{padding:0}
+  .cols3 > div + div{border-left:none;border-top:1px solid var(--grey-200);padding-top:26px}
+  .profile,.profile.mirror{flex-direction:column;gap:32px}
+  .feature{flex-direction:column;gap:20px}
+  .feature > div{width:auto}
+  .two,.metaphor{grid-template-columns:1fr;gap:32px}
+  .path ol{grid-template-columns:1fr;gap:28px}
+  .path .line{display:none}
+  .path li > div{position:static;padding:0}
+  .path li b{position:static;display:block;margin-bottom:12px}
+  .diagram{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="rail">
+    <div class="wordmark">D1STACK</div>
+    <ul class="nav">
+      <li><a href="#who" data-view="who" aria-current="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="9.5" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.4a3 3 0 010 5.2M17 14.4c2 1 3.5 2.9 3.5 5.6"/></svg>
+        <span><span class="n">01</span><span class="l">Who we are</span><span class="u"></span></span>
+      </a></li>
+      <li><a href="#what" data-view="what">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        <span><span class="n">02</span><span class="l">What we do</span><span class="u"></span></span>
+      </a></li>
+      <li><a href="#how" data-view="how">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="4" width="6" height="5"/><rect x="15" y="15" width="6" height="5"/><path d="M9 6.5h6a3 3 0 013 3v5.5"/></svg>
+        <span><span class="n">03</span><span class="l">How we work</span><span class="u"></span></span>
+      </a></li>
+      <li><a href="#ai" data-view="ai">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
+        <span><span class="n">04</span><span class="l">AI era</span><span class="u"></span></span>
+      </a></li>
+    </ul>
+    <div class="rail-foot">d1stack.com</div>
+  </nav>
+
+  <main>
+
+    <!-- ============ 01 WHO WE ARE ============ -->
+    <section class="view is-active" id="view-who">
+
+      <div class="block dark">
+        <div class="two">
+          <div>
+            <div class="accrule" style="margin-top:0"></div>
+            <h1 class="h1">Senior engineering for complex digital platforms.</h1>
+            <p class="lead" style="margin-top:36px;max-width:52ch">From requirements and architecture to implementation, testing and production.</p>
+            <a class="btn" href="#ai" data-view="ai" style="margin-top:44px">Let's discuss your project <span>&rarr;</span></a>
+          </div>
+          <div class="diagram">
+            <i style="left:40px;top:20px;width:1px;height:460px"></i>
+            <b style="left:36px;top:44px"></b><span style="left:64px;top:34px">ERP</span>
+            <b class="on" style="left:36px;top:150px"></b><span class="on" style="left:64px;top:140px">INTEGRATION LAYER</span>
+            <i style="left:40px;top:154px;width:190px;height:1px"></i>
+            <b style="left:226px;top:150px"></b>
+            <i style="left:230px;top:154px;width:1px;height:110px"></i>
+            <span style="left:258px;top:253px">PIM</span>
+            <b class="on" style="left:36px;top:296px"></b><span class="on" style="left:64px;top:286px">COMMERCE</span>
+            <i style="left:40px;top:300px;width:300px;height:1px"></i>
+            <b style="left:36px;top:444px"></b><span style="left:64px;top:434px">CUSTOMER</span>
+            <i style="left:40px;top:448px;width:400px;height:1px"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="eyebrow">Who we are</div>
+        <div class="accrule"></div>
+        <h2 class="h2">Who we are</h2>
+        <div class="two" style="margin-top:44px">
+          <p class="body">D1stack is a small engineering team building and modernising complex digital platforms. We work directly with the people who own the business problem, from first requirements through to production.</p>
+          <p class="statement">Senior people. Direct communication. No unnecessary layers.</p>
+        </div>
+
+        <div class="cols3">
+          <div>
+            <div class="num on">01</div>
+            <div class="ttl">Engineering-led</div>
+            <p class="small">Technical decisions are made by experienced engineers, not by account management.</p>
+          </div>
+          <div>
+            <div class="num">02</div>
+            <div class="ttl">Business-aware</div>
+            <p class="small">We start from operational reality: processes, data, constraints and dependencies.</p>
+          </div>
+          <div>
+            <div class="num">03</div>
+            <div class="ttl">Delivery-focused</div>
+            <p class="small">Every stage produces something reviewable: documents, prototypes, working software.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 WHAT WE DO ============ -->
+    <section class="view" id="view-what">
+      <div class="block">
+        <div class="eyebrow">Eight capabilities</div>
+        <div class="accrule"></div>
+        <h2 class="h2">What we do</h2>
+
+        <div class="feature">
+          <div>
+            <div class="num on">01</div>
+            <h3>Process automation</h3>
+          </div>
+          <p>Optimising business processes and reducing operating cost through automation and integration.</p>
+        </div>
+
+        <div class="grid">
+          <div class="item">
+            <div class="num">02</div>
+            <h3>Custom software development</h3>
+            <p class="small">Business applications and platforms designed around real operational requirements.</p>
+          </div>
+          <div class="item on">
+            <div class="num on">03</div>
+            <h3>Product information management</h3>
+            <p class="small">Structured product data, enrichment workflows and reliable syndication.</p>
+          </div>
+          <div class="item">
+            <div class="num">04</div>
+            <h3>Digital commerce</h3>
+            <p class="small">Storefronts and commerce backends built for catalogue scale and change.</p>
+          </div>
+          <div class="item">
+            <div class="num">05</div>
+            <h3>Systems integration</h3>
+            <p class="small">ERP, PIM, commerce and third-party services connected with predictable data flow.</p>
+          </div>
+          <div class="item">
+            <div class="num">06</div>
+            <h3>Architecture &amp; modernisation</h3>
+            <p class="small">Assessment and incremental replacement of systems that have outgrown their design.</p>
+          </div>
+          <div class="item">
+            <div class="num">07</div>
+            <h3>DevOps &amp; cloud</h3>
+            <p class="small">Environments, pipelines and monitoring so software runs the way it was designed.</p>
+          </div>
+          <div class="item">
+            <div class="num">08</div>
+            <h3>KYC systems</h3>
+            <p class="small">Know-your-client onboarding, identity verification and compliance workflows.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 HOW WE WORK ============ -->
+    <section class="view" id="view-how">
+      <div class="block">
+        <div class="eyebrow">How we work</div>
+        <div class="accrule"></div>
+        <h2 class="h2">How we work</h2>
+        <p class="lead" style="margin-top:20px">A structured path from business requirements to production.</p>
+
+        <div class="path">
+          <div class="line"></div>
+          <ol>
+            <li class="up on"><b></b><div><div class="num on">01</div><div class="nm">Planning</div><div class="tag">BRD + estimates</div></div></li>
+            <li class="down"><b></b><div><div class="num">02</div><div class="nm">Design &amp; prototype</div></div></li>
+            <li class="up"><b></b><div><div class="num">03</div><div class="nm">Implementation</div></div></li>
+            <li class="down"><b></b><div><div class="num">04</div><div class="nm">Testing</div></div></li>
+            <li class="up"><b></b><div><div class="num">05</div><div class="nm">Stress testing</div></div></li>
+            <li class="down on"><b></b><div><div class="num">06</div><div class="nm">Go live</div><div class="tag">Production</div></div></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="block" style="padding-top:0">
+        <div class="eyebrow">Stages 01 — 03</div>
+        <h3 class="h3" style="margin-top:18px">From requirements to software</h3>
+        <div class="grid">
+          <div class="stage on">
+            <div class="num on">01</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></svg>
+            <div class="ttl">Planning</div>
+            <p class="small">Understand business processes, requirements, integrations, dependencies and constraints.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">Business Requirements Document + initial estimates</div></div>
+          </div>
+          <div class="stage">
+            <div class="num">02</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="4" width="8" height="7"/><rect x="13" y="13" width="8" height="7"/><path d="M11 7.5h10v5.5M7 11v9h6"/></svg>
+            <div class="ttl">Design &amp; prototype</div>
+            <p class="small">Define architecture, data model and interfaces, then validate them with a working prototype.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">Architecture design + reviewed prototype</div></div>
+          </div>
+          <div class="stage">
+            <div class="num">03</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 5l-2 14"/></svg>
+            <div class="ttl">Implementation</div>
+            <p class="small">Build in reviewable increments against the agreed architecture, with continuous integration.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">Working software in a staging environment</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block" style="padding-top:0">
+        <div class="eyebrow">Stages 04 — 06</div>
+        <h3 class="h3" style="margin-top:18px">From software to production</h3>
+        <div class="grid">
+          <div class="stage">
+            <div class="num">04</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 12l5 5L20 6"/><path d="M4 5h8M4 19h5"/></svg>
+            <div class="ttl">Testing</div>
+            <p class="small">Functional, integration and acceptance testing against the documented requirements.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">Test coverage + defect resolution log</div></div>
+          </div>
+          <div class="stage">
+            <div class="num">05</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 20a9 9 0 0118 0"/><path d="M12 20l5-6"/><path d="M3 20h18"/></svg>
+            <div class="ttl">Stress testing</div>
+            <p class="small">Load, performance and failure behaviour measured under realistic production conditions.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">Performance report + capacity limits</div></div>
+          </div>
+          <div class="stage">
+            <div class="num">06</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 21V5"/><path d="M6 11l6-6 6 6"/><path d="M4 21h16"/></svg>
+            <div class="ttl">Go live</div>
+            <p class="small">Controlled release, monitoring and handover, with support through the first operating period.</p>
+            <div class="output"><div class="lbl">OUTPUT &rarr;</div><div class="val">System in production + operating documentation</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 AI ERA ============ -->
+    <section class="view" id="view-ai">
+      <div class="block">
+        <div class="eyebrow">AI era</div>
+        <div class="accrule"></div>
+        <h2 class="h2">AI era</h2>
+        <p class="h3" style="margin-top:32px;max-width:22ch;font-size:38px;line-height:1.25">AI is a powerful tool. Experience is what makes it useful.</p>
+
+        <div class="two" style="margin-top:56px;border-top:1px solid var(--grey-200);padding-top:34px">
+          <div>
+            <p class="body">Businesses should absolutely use AI. It can accelerate research, development, analysis, automation, documentation and everyday decision-making.</p>
+            <p class="body" style="margin-top:20px">But AI should not replace experienced people responsible for understanding the business, validating the output and making the final decisions.</p>
+          </div>
+          <div>
+            <div class="mono" style="color:var(--accent);letter-spacing:.16em;margin-bottom:20px">EXPERIENCED PROFESSIONALS PROVIDE</div>
+            <div class="matrix" style="border-top:none;padding-top:0;margin-top:0">
+              <span>Context</span><span>Judgement</span>
+              <span>Architecture</span><span>Validation</span>
+              <span>Accountability</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="statement" style="margin-top:56px;max-width:60ch">AI can make experienced people dramatically more effective. It does not remove the need for experience.</p>
+      </div>
+
+      <div class="block" style="padding-top:0">
+        <div class="metaphor">
+          <div class="photo"><img src="assets/image/horse.webp" alt=""></div>
+          <div>
+            <div class="eyebrow">The metaphor</div>
+            <div class="accrule"></div>
+            <p class="h3">Think of AI as a great horse.</p>
+            <p class="body" style="margin-top:26px">A good horse gives you speed, strength and the ability to travel much further than you could on your own. But the horse does not decide where you need to go.</p>
+            <p class="body" style="margin-top:18px">Without an experienced rider, all that power can take you in the wrong direction.</p>
+            <p class="body" style="margin-top:18px">AI works the same way. It is enormously capable, but without experienced people providing direction, judgement and control, it can become inefficient, misleading or even dangerous.</p>
+            <p class="statement" style="margin-top:34px;border-top:1px solid var(--grey-200);padding-top:26px">The advantage is not AI alone. The advantage is experienced people using AI well.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="block" style="padding-top:0">
+        <div class="eyebrow">AI era</div>
+        <h3 class="h3" style="margin-top:18px">How businesses should use AI</h3>
+        <div class="grid">
+          <div class="item on">
+            <div class="num on">01</div>
+            <h3>Accelerate</h3>
+            <p class="small">Use AI to speed up research, analysis, coding, documentation and repetitive work.</p>
+          </div>
+          <div class="item">
+            <div class="num">02</div>
+            <h3>Augment</h3>
+            <p class="small">Let AI increase the productivity of experienced employees rather than blindly replacing them.</p>
+          </div>
+          <div class="item">
+            <div class="num">03</div>
+            <h3>Validate</h3>
+            <p class="small">Critical outputs must be reviewed by people who understand the domain.</p>
+          </div>
+          <div class="item">
+            <div class="num">04</div>
+            <h3>Control</h3>
+            <p class="small">Humans remain responsible for architecture, business decisions, security and production outcomes.</p>
+          </div>
+        </div>
+
+        <div class="two" style="margin-top:64px;border-top:1px solid var(--grey-200);padding-top:34px">
+          <p class="h3" style="font-size:40px;line-height:1.15">AI-assisted.<br>Engineer-led.</p>
+          <p class="body">At D1stack, we see AI as part of the engineering toolkit. We use it where it creates real leverage — while keeping experienced engineers responsible for architecture, validation and delivery.</p>
+        </div>
+      </div>
+
+      <div class="block dark">
+        <div class="accrule" style="margin-top:0"></div>
+        <h2 class="h2" style="max-width:18ch;line-height:1.1">Build the right system before building the system right.</h2>
+        <p class="lead" style="margin-top:32px;max-width:52ch">If you have a platform to build, modernise or integrate, we can start with the requirements.</p>
+        <div class="contact">
+          <span style="color:var(--accent-600)">LET'S DISCUSS YOUR PROJECT</span>
+          <a href="https://d1stack.com" style="color:var(--grey-100)">d1stack.com</a>
+          <a href="mailto:hello@d1stack.com" style="color:var(--grey-400)">hello@d1stack.com</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  var links = document.querySelectorAll('[data-view]');
+  var views = document.querySelectorAll('.view');
+  var navLinks = document.querySelectorAll('.nav [data-view]');
+
+  function show(id) {
+    for (var i = 0; i < views.length; i++) {
+      views[i].classList.toggle('is-active', views[i].id === 'view-' + id);
+    }
+    for (var j = 0; j < navLinks.length; j++) {
+      navLinks[j].setAttribute('aria-current', navLinks[j].dataset.view === id ? 'true' : 'false');
+    }
+    if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+    window.scrollTo(0, 0);
+  }
+
+  for (var k = 0; k < links.length; k++) {
+    links[k].addEventListener('click', function (e) {
+      e.preventDefault();
+      show(this.dataset.view);
+    });
+  }
+
+  var initial = (location.hash || '#who').slice(1);
+  if (document.getElementById('view-' + initial)) show(initial);
+})();
+</script>
+
+</body>
+</html>
