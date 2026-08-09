@@ -40,8 +40,7 @@ img{display:block;max-width:100%}
 .nav a[aria-current="true"] .u{opacity:1}
 .rail-foot{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--grey-400)}
 main{margin-left:var(--rail);flex:1;min-width:0}
-.view{display:none}
-.view.is-active{display:block}
+.view{display:block}
 .block{padding:88px var(--gutter)}
 .block.dark{background:var(--ink-900);color:var(--white)}
 .block.dark p{color:var(--grey-400)}
@@ -189,19 +188,6 @@ main{margin-left:var(--rail);flex:1;min-width:0}
             <h1 class="h1">Senior engineering for complex digital platforms.</h1>
             <p class="lead" style="margin-top:36px;max-width:52ch">From requirements and architecture to implementation, testing and production.</p>
             <a class="btn" href="#ai" data-view="ai" style="margin-top:44px">Let's discuss your project <span>&rarr;</span></a>
-          </div>
-          <div class="diagram">
-            <i style="left:40px;top:20px;width:1px;height:460px"></i>
-            <b style="left:36px;top:44px"></b><span style="left:64px;top:34px">ERP</span>
-            <b class="on" style="left:36px;top:150px"></b><span class="on" style="left:64px;top:140px">INTEGRATION LAYER</span>
-            <i style="left:40px;top:154px;width:190px;height:1px"></i>
-            <b style="left:226px;top:150px"></b>
-            <i style="left:230px;top:154px;width:1px;height:110px"></i>
-            <span style="left:258px;top:253px">PIM</span>
-            <b class="on" style="left:36px;top:296px"></b><span class="on" style="left:64px;top:286px">COMMERCE</span>
-            <i style="left:40px;top:300px;width:300px;height:1px"></i>
-            <b style="left:36px;top:444px"></b><span style="left:64px;top:434px">CUSTOMER</span>
-            <i style="left:40px;top:448px;width:400px;height:1px"></i>
           </div>
         </div>
       </div>
@@ -462,26 +448,45 @@ main{margin-left:var(--rail);flex:1;min-width:0}
   var views = document.querySelectorAll('.view');
   var navLinks = document.querySelectorAll('.nav [data-view]');
 
-  function show(id) {
-    for (var i = 0; i < views.length; i++) {
-      views[i].classList.toggle('is-active', views[i].id === 'view-' + id);
-    }
+  function updateNav(id) {
     for (var j = 0; j < navLinks.length; j++) {
       navLinks[j].setAttribute('aria-current', navLinks[j].dataset.view === id ? 'true' : 'false');
     }
     if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
-    window.scrollTo(0, 0);
   }
 
   for (var k = 0; k < links.length; k++) {
     links[k].addEventListener('click', function (e) {
       e.preventDefault();
-      show(this.dataset.view);
+      var viewEl = document.getElementById('view-' + this.dataset.view);
+      if (viewEl) {
+        viewEl.scrollIntoView({ behavior: 'smooth' });
+        updateNav(this.dataset.view);
+      }
     });
   }
 
-  var initial = (location.hash || '#who').slice(1);
-  if (document.getElementById('view-' + initial)) show(initial);
+  // Scroll-based section switching
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var viewId = entry.target.id.replace('view-', '');
+          updateNav(viewId);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    views.forEach(function (view) {
+      observer.observe(view);
+    });
+  }
+
+  // Set initial hash
+  var initial = location.hash.slice(1) || 'who';
+  if (document.getElementById('view-' + initial)) {
+    updateNav(initial);
+  }
 })();
 </script>
 
