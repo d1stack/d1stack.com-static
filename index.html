@@ -63,6 +63,10 @@ main{margin-left:var(--rail);flex:1;min-width:0}
 /* ---------- pieces ---------- */
 .btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:14px 26px;border:1px solid var(--accent);background:var(--accent);color:var(--white);cursor:pointer;transition:background .2s}
 .btn:hover{background:var(--accent-600);color:var(--white)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:auto;-webkit-appearance:none;appearance:none}
+.hamburger svg{width:32px;height:32px;display:block}
+.hamburger path{stroke:var(--white);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.hamburger:hover path{stroke:var(--accent)}
 .rule{height:1px;background:var(--grey-200)}
 .dark .rule{background:var(--ink-500)}
 
@@ -123,13 +127,19 @@ main{margin-left:var(--rail);flex:1;min-width:0}
 .contact{display:flex;gap:56px;flex-wrap:wrap;border-top:1px solid var(--ink-500);padding-top:28px;margin-top:64px;font-family:var(--mono);font-size:15px;letter-spacing:.14em}
 
 @media (max-width:1100px){
-  .rail{position:static;width:100%;flex-direction:row;align-items:center;justify-content:flex-start;gap:32px;padding:16px 24px;overflow-x:auto}
-  .rail-foot{display:none}
-  .nav{flex-direction:row;gap:24px}
-  .nav a{display:block}
-  .nav svg{display:none}
-  .nav .u{margin-top:6px}
-  .shell{display:block}
+  .hamburger{display:flex}
+  .shell{display:block;position:relative}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:280px;flex-direction:column;justify-content:flex-start;gap:0;padding:0;z-index:99;transform:translateX(-100%);transition:transform .3s ease;background:var(--ink-900)}
+  .rail.is-open{transform:translateX(0)}
+  .rail.is-open::before{content:'';position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(16,24,31,0.7);z-index:-1}
+  .rail-top{display:flex;align-items:center;gap:24px;padding:16px 24px;border-bottom:1px solid var(--ink-500)}
+  .wordmark{flex:1}
+  .nav{flex-direction:column;gap:0;padding:0;margin-top:0}
+  .nav a{display:flex;gap:14px;padding:20px 24px;border-bottom:1px solid var(--ink-500)}
+  .nav svg{display:block}
+  .nav .u{margin-top:12px}
+  .nav a:last-child{border-bottom:none}
+  .rail-foot{padding:24px;font-size:13px;border-top:1px solid var(--ink-500);margin-top:auto}
   main{margin-left:0}
   .block{padding:56px 24px}
   .h1{font-size:40px}.h2{font-size:32px}.h3{font-size:26px}
@@ -154,7 +164,12 @@ main{margin-left:var(--rail);flex:1;min-width:0}
 <div class="shell">
 
   <nav class="rail">
-    <div class="wordmark">D1STACK</div>
+    <div class="rail-top">
+      <div class="wordmark">D1STACK</div>
+      <button class="hamburger" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
     <ul class="nav">
       <li><a href="#who" data-view="who" aria-current="true">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="9.5" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.4a3 3 0 010 5.2M17 14.4c2 1 3.5 2.9 3.5 5.6"/></svg>
@@ -447,12 +462,30 @@ main{margin-left:var(--rail);flex:1;min-width:0}
   var links = document.querySelectorAll('[data-view]');
   var views = document.querySelectorAll('.view');
   var navLinks = document.querySelectorAll('.nav [data-view]');
+  var rail = document.querySelector('.rail');
+  var hamburger = document.querySelector('.hamburger');
+  var isSmallScreen = window.innerWidth <= 1100;
 
   function updateNav(id) {
     for (var j = 0; j < navLinks.length; j++) {
       navLinks[j].setAttribute('aria-current', navLinks[j].dataset.view === id ? 'true' : 'false');
     }
     if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+  }
+
+  function closeMenu() {
+    if (isSmallScreen) {
+      rail.classList.remove('is-open');
+    }
+  }
+
+  function toggleMenu() {
+    rail.classList.toggle('is-open');
+  }
+
+  // Hamburger click handler
+  if (hamburger) {
+    hamburger.addEventListener('click', toggleMenu);
   }
 
   for (var k = 0; k < links.length; k++) {
@@ -462,6 +495,7 @@ main{margin-left:var(--rail);flex:1;min-width:0}
       if (viewEl) {
         viewEl.scrollIntoView({ behavior: 'smooth' });
         updateNav(this.dataset.view);
+        closeMenu();
       }
     });
   }
@@ -479,6 +513,22 @@ main{margin-left:var(--rail);flex:1;min-width:0}
 
     views.forEach(function (view) {
       observer.observe(view);
+    });
+  }
+
+  // Handle window resize
+  window.addEventListener('resize', function () {
+    isSmallScreen = window.innerWidth <= 1100;
+    if (!isSmallScreen) {
+      rail.classList.remove('is-open');
+    }
+  });
+
+  // Close menu when clicking on main content
+  var main = document.querySelector('main');
+  if (main) {
+    main.addEventListener('click', function () {
+      if (isSmallScreen) closeMenu();
     });
   }
 
